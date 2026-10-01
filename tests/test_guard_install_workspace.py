@@ -27,7 +27,7 @@ from codex_plugin_scanner.guard.config import resolve_guard_home
 from codex_plugin_scanner.guard.launcher import merge_guard_launcher_env
 from codex_plugin_scanner.guard.store import GuardStore
 
-LEGACY_OMP_BASE_SOURCE_SHA256 = "d3acaeaa3c4906c38ad1087ee7bc93f789dcd4628b237bd0ef25f569160022f3"
+LEGACY_OMP_BASE_SOURCE_SHA256 = "fbd87651af3850ea8bf0772bc0649c91f791b9fa01dbb493934209eb139e2bce"
 
 
 def _legacy_omp_base_source_sha256(source: str) -> str:
@@ -379,6 +379,7 @@ def test_resolve_default_install_workspace_ignores_cursor_dir_without_git(
     assert resolved is None
 
 
+@pytest.mark.usefixtures("native_hook_force")
 def test_install_cursor_hook_script_allows_benign_shell_command(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

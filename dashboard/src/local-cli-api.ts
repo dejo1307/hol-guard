@@ -125,16 +125,20 @@ export function addedCustomExtensions(items: readonly LocalCliItem[]): LocalCliI
   return items.filter((item) => item.state !== "unset");
 }
 
-export function connectorWorkspaceItems(items: readonly LocalCliItem[], query = ""): LocalCliItem[] {
-  const needle = query.trim().toLowerCase();
-  const attention = (item: LocalCliItem) => item.stale || item.state === "unset" || item.mcp_catalog?.stale
+/** True when the connector needs a decision: not enrolled yet, stale, or its tool inventory changed. */
+export function customExtensionNeedsReview(item: LocalCliItem): boolean {
+  return item.stale || item.state === "unset" || item.mcp_catalog?.stale
     || item.mcp_catalog?.complete === false || Boolean(item.mcp_catalog?.changes?.added.length)
     || Boolean(item.mcp_catalog?.changes?.changed.length);
+}
+
+export function connectorWorkspaceItems(items: readonly LocalCliItem[], query = ""): LocalCliItem[] {
+  const needle = query.trim().toLowerCase();
   return items.filter((item) => item.state !== "unset" || (item.surface === "mcp" && item.suggestable))
     .filter((item) => !needle || [item.name, item.source_label, item.surface,
       ...item.commands.flatMap((command) => [command.name, command.usage, command.description])]
       .some((value) => value?.toLowerCase().includes(needle)))
-    .sort((a, b) => Number(attention(b)) - Number(attention(a))
+    .sort((a, b) => Number(customExtensionNeedsReview(b)) - Number(customExtensionNeedsReview(a))
       || (Date.parse(b.last_seen_at ?? "") || 0) - (Date.parse(a.last_seen_at ?? "") || 0)
       || a.name.localeCompare(b.name) || a.cli_id.localeCompare(b.cli_id));
 }
@@ -441,6 +445,14 @@ export async function waitForMcpDiscoveryJob(cliId: string, initialJob: unknown,
         switch (job.error) {
           case "mcp_refresh_unavailable":
             message = "Guard cannot list this connection directly. Refresh it in its host app."; break;
+          case "mcp_launch_failed":
+            message = "Guard could not launch this MCP server. Check its configured executable and dependencies in the host app. Known tools and choices were kept."; break;
+          case "mcp_transport_failed":
+            message = "Guard could not communicate with this MCP server. Check its executable, dependencies, and server logs in the host app. Known tools and choices were kept."; break;
+          case "mcp_initialize_failed":
+            message = "The MCP server did not complete initialization. Check that it starts in the host app and uses stdio MCP. Known tools and choices were kept."; break;
+          case "mcp_protocol_unsupported":
+            message = "This server uses an MCP protocol version Guard does not support. Check the server and Guard versions. Known tools and choices were kept."; break;
           case "catalog_revision_conflict":
             message = "A newer discovery finished first. Reload the inventory."; break;
           case "configured_host_scan_failed":

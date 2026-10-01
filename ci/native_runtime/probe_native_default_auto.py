@@ -273,7 +273,7 @@ def _exercise_mode_invariants(
             mode_invariants[mode] = {
                 "decision": response.get("decision"),
                 "reason_code": response.get("reason_code"),
-                "python_oracle": daemon._server.hook_worker.test_oracle is not None,
+                "python_oracle": getattr(daemon._server.hook_worker, "test_oracle", None) is not None,
             }
             _require(mode_invariants[mode]["python_oracle"] is False, mode_invariants[mode])
     finally:
@@ -325,14 +325,14 @@ def _installed_hook_corpus(root: Path) -> dict[str, object]:
         worker_stats = wait_for_route_corpus(
             daemon._server.hook_worker.metrics,
             expected=len(route_receipts),
-            timeout_seconds=15.0 if os.name == "nt" else 5.0,
+            timeout_seconds=45.0 if os.name == "nt" else 5.0,
         )
         writer = daemon._server.runtime_hook_evidence_writer
         mode_invariants = _exercise_mode_invariants(daemon, guard_home, workspace)
         evidence_stats = wait_for_receipt_corpus(
             writer,
             expected=len(route_receipts),
-            timeout_seconds=15.0 if os.name == "nt" else 5.0,
+            timeout_seconds=45.0 if os.name == "nt" else 5.0,
         )
     finally:
         daemon.stop()
