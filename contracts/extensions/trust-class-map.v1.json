@@ -87,6 +87,7 @@
       "command.genclave",
       "command.gitsync",
       "command.mcp-contribos",
+      "command.mcp-enola",
       "command.mcp-filesystem",
       "command.mcp-instapods",
       "command.mcp-pr-ui-compare",
