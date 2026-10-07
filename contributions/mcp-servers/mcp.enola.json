@@ -52,7 +52,7 @@
   ],
   "saferAlternatives": [
     "Launch enola as `uvx --from enola-cli enola` or `pipx run --spec enola-cli enola`; a bare `enola` binary on PATH is not matched by this entry.",
-    "Pass an explicit repo_path to generate_snapshot; enola then writes only that repository's .enola directory and its ~/.enola receipt.",
+    "Pass an explicit repo_path to generate_snapshot so enola targets that repository; by default it writes the repository's .enola directory plus receipts and usage data under ~/.enola, and a custom output.dir or appended repository can write elsewhere.",
     "Add --no-dashboard to the launch arguments if the MCP server should not open its dashboard on 127.0.0.1.",
     "Set ENOLA_NO_UPDATE_CHECK=1 in the server environment to skip the release version check against GitHub."
   ]
